@@ -1,0 +1,134 @@
+<?php
+// $Id$
+/**
+ * @file
+ * This file contain functions allow students sso to Sallie Mae Check Refund Site.
+ */
+
+/**
+ * Implement hook_menu
+ */
+
+function sso_refund_checks_menu() {
+    
+   //create menu item to remove page
+   $items['sso_refund_checks'] = array(
+    'title' => 'Sallie Mae Refund Checks',
+    'page callback' => 'sso_refund_checks_sallie_maeform',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+   );
+   
+   
+   //create menu item to remove page
+   $items['admin/settings/fhchs/sso_refund_checks'] =array(
+      'title' => 'Sallie Mae SSO Refund Checks Settings',
+      'description' => 'Configure Sallie Mae SSO Refund Checks Settings.',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('sso_refund_checks_setitings'),
+      'access arguments' => array('admin sso refund check'),
+      'type' => MENU_NORMAL_ITEM,
+   ); 
+   
+  
+  return $items;
+}
+
+
+/**
+ * Implement hook_permission
+ */
+function sso_refund_checks_perm() {
+  return array(
+    'check refund sso',
+    'admin sso refund check');   
+}
+
+
+/**
+ *  Display function to sing on to Sallie Refund checks site.
+ *
+ * @return string Sallie Mae sing on form.
+ * 
+ */
+
+function sso_refund_checks_sallie_maeform() {
+
+ //Get current user login
+ global $user;
+
+ $sallie_mae_url = variable_get('sso_check_refund_url', '');
+ //Generate sallie mae sso form
+ 
+ //Check if url is not empty
+ if ($sallie_mae_url !== '') {
+    
+    //Get form
+    $display = sonisweb_integration_api('CFC.sallie_mae', 'sso_check_refund', 'yes', array(array('sonis_ds', '#sonis.ds#'),
+                                                        array('url', $sallie_mae_url),
+                                                        array('account', $user->name)
+                                                        ));
+ }   
+ 
+
+ //Return form
+ return $display;
+
+}
+
+function sso_refund_checks_setitings($form_state) {
+    
+  //Get URL varible  
+  $sallie_mae_url = variable_get('sso_check_refund_url', '');
+    
+    //give the form a name
+  $form['#attributes'] = array('name' => 'sso_refund_checks_setitings');
+
+ 
+ //display the label and the text filed to hold name
+  $form['sallie_mae_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Sallie Mae SSO URL'),
+    '#default_value' => $sallie_mae_url,
+    '#size' => 100,
+    '#maxlength' => 100,
+    '#required' => TRUE,
+    '#description' => t('This is the URL were the users sign on form will post.'),
+    '#disabled' => FALSE,
+  );
+
+  //display submit button
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save Settings'),
+   );
+    
+   return $form;      
+ 
+}
+
+
+/**
+ * Implement hook_validate
+ */
+ 
+function sso_refund_checks_setitings_validate($form, &$form_state) {
+    
+    $good_url = preg_match("#((http|https)://(\S*?\.\S*?))(\s|\;|\)|\]|\[|\{|\}|,|\"|'|:|\<|$|\.\s)#ie",
+                           $form_state['values']['sallie_mae_url'] );
+    
+    //If is not a valid URL set a form error  
+    if (!$good_url) {
+        form_set_error('sallie_mae_url', 'The URL is not a valid formed URL.');
+    }
+}
+
+/**
+ * Implement hook_submit
+ */
+function sso_refund_checks_setitings_submit($form, &$form_state) {
+    //Save URL
+    variable_set('sso_check_refund_url', $form_state['values']['sallie_mae_url']);
+    
+}
+

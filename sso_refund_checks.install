@@ -1,0 +1,23 @@
+<?php
+// $Id$
+
+/**
+* @file
+* Install sso_check_refund.
+*/
+
+/**
+* Implements hook_install()
+*/
+function sso_refund_checks_install() {
+
+    variable_set('sso_check_refund_url', 'https://stg.bosebill.salliemae.com/NetPay/EBPP/AU/Tuition+and+Fees/1218/EBPP.aspx');
+ 
+}
+
+function sso_refund_checks_uninstall() {
+  
+  //delete persistent variable to register module 
+  variable_del('sso_check_refund_url');
+  
+}

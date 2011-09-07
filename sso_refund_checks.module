@@ -12,12 +12,13 @@
 function sso_refund_checks_menu() {
     
    //create menu item to remove page
-   $items['sso_refund_checks'] = array(
+   $items['refunds'] = array(
     'title' => 'Sallie Mae Refund Checks',
+    'menu_name' => 'primary-links',
     'page callback' => 'sso_refund_checks_sallie_maeform',
     'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
    );
+   
    
    
    //create menu item to remove page
@@ -27,7 +28,6 @@ function sso_refund_checks_menu() {
       'page callback' => 'drupal_get_form',
       'page arguments' => array('sso_refund_checks_setitings'),
       'access arguments' => array('admin sso refund check'),
-      'type' => MENU_NORMAL_ITEM,
    ); 
    
   
@@ -70,6 +70,13 @@ function sso_refund_checks_sallie_maeform() {
                                                         ));
  }   
  
+ if (fhchs_utility_get_user_type($user->name) == 'student') { 
+   //submit form to SSO redirect
+   $display .= '<script type="text/javascript">document.sso.submit();</script>';
+ }
+ else {
+   $display = 'Hey there, Looks like the page you\'re trying to visit requires you to be logged into my.FHCHS.edu as a student.';
+ } 
 
  //Return form
  return $display;
@@ -127,7 +134,7 @@ function sso_refund_checks_setitings_validate($form, &$form_state) {
  * Implement hook_submit
  */
 function sso_refund_checks_setitings_submit($form, &$form_state) {
-    //Save URL
+    //Save URL   
     variable_set('sso_check_refund_url', $form_state['values']['sallie_mae_url']);
     
 }

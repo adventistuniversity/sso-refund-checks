@@ -2,6 +2,7 @@ name = SSO Check Refund
 description = Allow user to be authenticated to Sallie Mae check refund site
 package = Florida Hospital College Modules
 dependencies[] = sonisweb_integration
+dependencies[] = fhchs_utility
 core = 6.x
 
 

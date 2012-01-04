@@ -56,28 +56,43 @@ function sso_refund_checks_sallie_maeform() {
 
  //Get current user login
  global $user;
-
+ 
+ $testing = 0;
+ 
+ //Get Sallie Mae URL
  $sallie_mae_url = variable_get('sso_check_refund_url', '');
- //Generate sallie mae sso form
+ 
+ if(fhchs_utility_get_user_type($user->name) == 'employee' && ($testing == 1)) {
+   
+   $employee_soc_sec = sonisweb_integration_api("SonisWeb200.CustomPages.password_changer", "getSonisId", "yes",
+                                       array(array('opid', $user->name)));
+      
+ }  
  
  //Check if url is not empty
  if ($sallie_mae_url !== '') {
-    
-    //Get form
+       
     $display = sonisweb_integration_api('CFC.sallie_mae', 'sso_check_refund', 'yes', array(array('sonis_ds', '#sonis.ds#'),
                                                         array('url', $sallie_mae_url),
-                                                        array('account', $user->name)
-                                                        ));
- }   
+                                                        array('account', isset($employee_soc_sec)?$employee_soc_sec:$user->name)
+                                                       ));
+ }
+ 
  
  if (fhchs_utility_get_user_type($user->name) == 'student') { 
    //submit form to SSO redirect
    $display .= '<script type="text/javascript">document.sso.submit();</script>';
+ } //This is just for testing purposes user testing the environment are goint to be employees
+ elseif(fhchs_utility_get_user_type($user->name) == 'employee' && ($testing == 1)) {
+   //Get test user information 
+   $display .= '<script type="text/javascript">document.sso.submit();$</script>';  
  }
  else {
-   $display = 'Hey there, Looks like the page you\'re trying to visit requires you to be logged into my.FHCHS.edu as a student.';
+   $display = '<br /><br />Hey there, Looks like the page you\'re trying to visit requires you to be logged into my.FHCHS.edu as a student.';
  } 
 
+  //$display = '<br /><br />Oops! Sorry! Due to technical difficulties, the refund sign-up process is off-line. We\'re working hard to make it available again soon.<br /><br />';
+ 
  //Return form
  return $display;
 
